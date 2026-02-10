@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gestprod_app/core/di/service_locator.dart';
 import 'package:gestprod_app/core/router/router.dart';
 import 'package:gestprod_app/core/shared/widgets/widgets.dart';
+import 'package:gestprod_app/features/catalog/presentation/presentation.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await setupServiceLocator();
   serviceLocatorInit();
   runApp(const BlocsProvider());
 }
@@ -17,7 +20,8 @@ class BlocsProvider extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => getIt<RouterCubit>()),
-        BlocProvider(create: (context) => getIt<MenuIndexCubit>())
+        BlocProvider(create: (context) => getIt<MenuIndexCubit>()),
+        BlocProvider(create: (context) => getIt<ProductosBloc>(),lazy: false,),
       ],
       child: const MyApp(),
     );
