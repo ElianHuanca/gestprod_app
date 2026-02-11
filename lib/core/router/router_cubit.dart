@@ -9,4 +9,5 @@ class RouterCubit extends Cubit<GoRouter> {
   void goHome() => state.go('/');
   void goProductos() => state.go('/productos');
   void goCategorias() => state.go('/categorias');
+  void goProducto(String id) => state.push('/producto/$id');
 }

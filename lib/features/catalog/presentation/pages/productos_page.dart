@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gestprod_app/core/shared/shared.dart';
+import 'package:gestprod_app/core/core.dart';
 import 'package:gestprod_app/features/catalog/domain/domain.dart';
 import 'package:gestprod_app/features/catalog/presentation/presentation.dart';
+import 'package:go_router/go_router.dart';
 
 class ProductosPage extends StatelessWidget {
   const ProductosPage({super.key});
@@ -14,6 +15,13 @@ class ProductosPage extends StatelessWidget {
       body: _buildBody(context),
       title: 'Productos',
       isGridview: true,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.grey[50],
+        onPressed: () {
+          context.push('/producto/0');
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
@@ -50,7 +58,9 @@ class ProductosPage extends StatelessWidget {
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            context.push('/producto/${producto.id}');
+          },
           child: Column(
             children: [
               Expanded(

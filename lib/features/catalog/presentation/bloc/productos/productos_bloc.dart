@@ -21,8 +21,7 @@ class ProductosBloc extends Bloc<ProductosEvent, ProductosState> {
   ) async {
     emit(ProductosCargando());
     try {
-      final productos = await repository.obtenerProductos();
-      print(productos);
+      final productos = await repository.obtenerProductos();    
       emit(ProductosCargado(productos));
     } catch (e) {
       emit(ProductosError(e.toString()));

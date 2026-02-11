@@ -10,6 +10,10 @@ final publicRoutes = GoRouter(
       builder: (context, state) => const ProductosPage(),
     ),
     GoRoute(
+      path: '/producto/:id',
+      builder: (context, state) => ProductoPage(id: state.pathParameters['id']!),
+    ),
+    GoRoute(
       path: '/categorias',
       builder: (context, state) => const CategoriasPage(),
     ),
