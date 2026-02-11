@@ -7,8 +7,7 @@ import 'package:gestprod_app/features/catalog/presentation/presentation.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  await setupServiceLocator();
-  serviceLocatorInit();
+  await serviceLocatorInit();
   runApp(const BlocsProvider());
 }
 
@@ -21,7 +20,7 @@ class BlocsProvider extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => getIt<RouterCubit>()),
         BlocProvider(create: (context) => getIt<MenuIndexCubit>()),
-        BlocProvider(create: (context) => getIt<ProductosBloc>(),lazy: false,),
+        BlocProvider(create: (context) => getIt<ProductosBloc>()..add(CargarProductos()),lazy: false,),
       ],
       child: const MyApp(),
     );

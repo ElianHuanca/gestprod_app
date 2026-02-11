@@ -11,7 +11,7 @@ class ProductosPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Screen1(
       backRoute: false,
-      widget: [_buildBody(context)],
+      body: _buildBody(context),
       title: 'Productos',
       isGridview: true,
     );
@@ -27,6 +27,8 @@ class ProductosPage extends StatelessWidget {
         if (state is ProductosCargado) {
           return GridView.count(
             crossAxisCount: 2,
+            crossAxisSpacing: 30,
+            mainAxisSpacing: 30,
             children: _buildGrid(state.productos, context),
           );
         }

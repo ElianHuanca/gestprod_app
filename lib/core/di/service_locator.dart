@@ -7,12 +7,9 @@ import 'package:sqflite/sqflite.dart';
 
 GetIt getIt = GetIt.instance;
 
-void serviceLocatorInit() {
+Future<void> serviceLocatorInit() async {
   getIt.registerSingleton(RouterCubit());
   getIt.registerSingleton(MenuIndexCubit());
-}
-
-Future<void> setupServiceLocator() async {
   //Database
   final db = await AppDatabase.database;
   getIt.registerSingleton<Database>(db);

@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class AppDatabase {
   static const _dbName = 'gestprod.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
 
   static Database? _database;
 
@@ -17,11 +17,7 @@ class AppDatabase {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, _dbName);
 
-    return await openDatabase(
-      path,
-      version: _dbVersion,
-      onCreate: _onCreate,
-    );
+    return await openDatabase(path, version: _dbVersion, onCreate: _onCreate);
   }
 
   static Future<void> _onCreate(Database db, int version) async {
@@ -32,11 +28,29 @@ class AppDatabase {
         precio REAL NOT NULL,
         image_url TEXT
       );
-
-      INSERT INTO productos (id, nombre, precio, image_url) VALUES
-        ('1', 'REDMI Buds 8 Lite', 23, 'https://i05.appmifile.com/884_item_es/23/12/2025/c7c628d92903085367d0ff5e241c9c10.png'),
-        ('2', 'REDMI Buds 5 PRO', 180, 'https://i05.appmifile.com/377_item_es/26/02/2025/c18730ec0c6163f0ae30099837282a4c.png'),
-        ('3', 'REDMI Buds 6 PRO', 60, 'https://i05.appmifile.com/574_item_es/10/01/2025/895fb8e8079dc373a8931fcbd1521e8e.png');
     ''');
+    await db.insert('productos', {
+      'id': '1',
+      'nombre': 'REDMI Buds 8 Lite',
+      'precio': 23,
+      'image_url':
+          'https://i05.appmifile.com/884_item_es/23/12/2025/c7c628d92903085367d0ff5e241c9c10.png',
+    });
+
+    await db.insert('productos', {
+      'id': '2',
+      'nombre': 'REDMI Buds 5 PRO',
+      'precio': 180,
+      'image_url':
+          'https://i05.appmifile.com/377_item_es/26/02/2025/c18730ec0c6163f0ae30099837282a4c.png',
+    });
+
+    await db.insert('productos', {
+      'id': '3',
+      'nombre': 'REDMI Buds 6 PRO',
+      'precio': 60,
+      'image_url':
+          'https://i05.appmifile.com/574_item_es/10/01/2025/895fb8e8079dc373a8931fcbd1521e8e.png',
+    });
   }
 }
