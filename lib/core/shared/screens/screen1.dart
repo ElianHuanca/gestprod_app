@@ -6,16 +6,17 @@ class Screen1 extends StatelessWidget {
   final Widget body;
   final String title;
   final bool isGridview;
-  final FloatingActionButton? floatingActionButton;
   final bool backRoute;
-  final Function? onTap;
+  final FloatingActionButton? floatingActionButton;
+  final VoidCallback? onTap;
+
   const Screen1({
-    required this.body,
     super.key,
+    required this.body,
     required this.title,
     required this.isGridview,
-    this.floatingActionButton,
     required this.backRoute,
+    this.floatingActionButton,
     this.onTap,
   });
 
@@ -41,10 +42,10 @@ class Screen1 extends StatelessWidget {
           actions: [
             onTap != null
                 ? IconButton(
-                    onPressed: () => onTap!(),
+                    onPressed: onTap,
                     icon: const Icon(Icons.add),
                   )
-                : const SizedBox(),
+                : const SizedBox.shrink(),
           ],
         ),
         body: Padding(padding: const EdgeInsets.all(10), child: body),

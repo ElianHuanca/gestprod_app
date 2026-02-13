@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-/* final menuIndexProvider =
-    StateNotifierProvider<MenuIndexNotifier, MenuIndexState>(
-      (ref) => MenuIndexNotifier(),
-    ); */
-
 class MenuIndexCubit extends Cubit<MenuIndexState> {
   MenuIndexCubit() : super(MenuIndexState());
 
@@ -23,15 +18,14 @@ class MenuIndexState {
 }
 
 class SideMenu extends StatelessWidget {
-  final appLinkItems = ['/', '/productos', '/categorias'];
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  SideMenu({super.key});
+  static const _appLinkItems = ['/', '/productos', '/categorias'];
+
+  const SideMenu({super.key});
+
   @override
   Widget build(BuildContext context) {
     final hasNotch = MediaQuery.of(context).viewPadding.top > 35;
     final textStyles = Theme.of(context).textTheme;
-
-    //final menuIndexState = ref.watch(menuIndexProvider);
 
     return BlocBuilder<MenuIndexCubit, MenuIndexState>(
       builder: (context, menuIndexState) {
@@ -40,8 +34,8 @@ class SideMenu extends StatelessWidget {
           selectedIndex: menuIndexState.index,
           onDestinationSelected: (value) {
             context.read<MenuIndexCubit>().setIndex(value);
-            context.go(appLinkItems[value]);
-            scaffoldKey.currentState?.closeDrawer();
+            context.go(_appLinkItems[value]);
+            Navigator.pop(context);
           },
           children: [
             Padding(
