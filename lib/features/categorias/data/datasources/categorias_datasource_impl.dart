@@ -9,7 +9,11 @@ class CategoriasDatasourceImpl implements CategoriasDataSource {
 
   @override
   Future<List<CategoriaModel>> getAll() async {
-    final result = await db.query('categorias');
+    final result = await db.query(
+      'categorias',
+      where: 'activo = ?',
+      whereArgs: [1],
+    );
     return result.map(CategoriaModel.fromMap).toList();
   }
 
@@ -47,6 +51,11 @@ class CategoriasDatasourceImpl implements CategoriasDataSource {
 
   @override
   Future<void> delete(String id) async {
-    await db.delete('categorias', where: 'id = ?', whereArgs: [id]);
+    await db.update(
+      'categorias',
+      {'activo': 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

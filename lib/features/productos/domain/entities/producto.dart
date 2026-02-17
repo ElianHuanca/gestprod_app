@@ -4,6 +4,7 @@ class Producto {
   final double precio;
   final String imageUrl;
   final String categoriaId;
+  final bool activo;
 
   const Producto({
     required this.id,
@@ -11,5 +12,6 @@ class Producto {
     required this.precio,
     required this.imageUrl,
     required this.categoriaId,
+    this.activo = true,
   });
 }

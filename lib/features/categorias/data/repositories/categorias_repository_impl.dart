@@ -9,14 +9,22 @@ class CategoriasRepositoryImpl implements CategoriasRepository {
   @override
   Future<void> actualizarCategoria(Categoria categoria) async {
     await local.update(
-      CategoriaModel(id: categoria.id, nombre: categoria.nombre),
+      CategoriaModel(
+        id: categoria.id,
+        nombre: categoria.nombre,
+        activo: categoria.activo,
+      ),
     );
   }
 
   @override
   Future<void> crearCategoria(Categoria categoria) async {
     await local.insert(
-      CategoriaModel(id: categoria.id, nombre: categoria.nombre),
+      CategoriaModel(
+        id: categoria.id,
+        nombre: categoria.nombre,
+        activo: categoria.activo,
+      ),
     );
   }
 

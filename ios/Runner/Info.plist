@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>La app necesita la cámara para tomar fotos de productos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>La app necesita acceso a fotos para seleccionar imágenes de productos.</string>
 </dict>
 </plist>

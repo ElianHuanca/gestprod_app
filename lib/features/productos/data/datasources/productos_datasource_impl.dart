@@ -9,7 +9,11 @@ class ProductosDatasourceImpl implements ProductosDataSource {
 
   @override
   Future<List<ProductoModel>> getAll() async {
-    final result = await db.query('productos');
+    final result = await db.query(
+      'productos',
+      where: 'activo = ?',
+      whereArgs: [1],
+    );
     return result.map(ProductoModel.fromMap).toList();
   }
 
@@ -47,6 +51,12 @@ class ProductosDatasourceImpl implements ProductosDataSource {
 
   @override
   Future<void> delete(String id) async {
-    await db.delete('productos', where: 'id = ?', whereArgs: [id]);
+    // Eliminación lógica: marcar activo = 0 en lugar de borrar el registro
+    await db.update(
+      'productos',
+      {'activo': 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

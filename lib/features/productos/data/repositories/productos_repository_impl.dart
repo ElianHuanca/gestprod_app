@@ -15,6 +15,7 @@ class ProductosRepositoryImpl implements ProductosRepository {
         precio: producto.precio,
         imageUrl: producto.imageUrl,
         categoriaId: producto.categoriaId,
+        activo: producto.activo,
       ),
     );
   }
@@ -28,6 +29,8 @@ class ProductosRepositoryImpl implements ProductosRepository {
         precio: producto.precio,
         imageUrl: producto.imageUrl,
         categoriaId: producto.categoriaId,
+        costo: 0,
+        activo: true,
       ),
     );
   }

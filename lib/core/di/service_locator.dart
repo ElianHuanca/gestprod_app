@@ -17,6 +17,11 @@ Future<void> serviceLocatorInit() async {
   final db = await AppDatabase.database;
   getIt.registerSingleton<Database>(db);
 
+  // Cloudinary (subida de imágenes)
+  getIt.registerLazySingleton<CloudinaryService>(
+    () => CloudinaryService(),
+  );
+
   // Productos
   getIt.registerLazySingleton<ProductosDataSource>(
     () => ProductosDatasourceImpl(getIt<Database>()),

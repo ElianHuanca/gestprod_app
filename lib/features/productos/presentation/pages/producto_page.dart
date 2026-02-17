@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gestprod_app/core/core.dart';
@@ -5,6 +7,7 @@ import 'package:gestprod_app/features/categorias/domain/domain.dart';
 import 'package:gestprod_app/features/productos/domain/domain.dart';
 import 'package:gestprod_app/features/productos/presentation/bloc/productos/productos_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class ProductoPage extends StatefulWidget {
@@ -20,11 +23,16 @@ class _ProductoPageState extends State<ProductoPage> {
   final _formKey = GlobalKey<FormState>();
   final _nombreCtrl = TextEditingController();
   final _precioCtrl = TextEditingController();
-  final _imageCtrl = TextEditingController();
 
   bool _loading = false;
+  bool _uploadingImage = false;
   List<Categoria> _categorias = [];
   String? _categoriaId;
+  final ImagePicker _picker = ImagePicker();
+  /// Imagen local seleccionada (galería o cámara), aún no subida.
+  File? _pickedFile;
+  /// URL de la imagen (después de subir a Cloudinary o al cargar producto al editar).
+  String _imageUrl = '';
 
   @override
   void initState() {
@@ -55,8 +63,10 @@ class _ProductoPageState extends State<ProductoPage> {
       if (!mounted) return;
       _nombreCtrl.text = producto.nombre;
       _precioCtrl.text = producto.precio.toString();
-      _imageCtrl.text = producto.imageUrl;
-      setState(() => _categoriaId = producto.categoriaId);
+      setState(() {
+        _categoriaId = producto.categoriaId;
+        _imageUrl = producto.imageUrl;
+      });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -67,7 +77,7 @@ class _ProductoPageState extends State<ProductoPage> {
     }
   }
 
-  void _onSubmit() {
+  Future<void> _onSubmit() async {
     _formKey.currentState!.save();
     if (!_formKey.currentState!.validate()) return;
 
@@ -79,10 +89,39 @@ class _ProductoPageState extends State<ProductoPage> {
       return;
     }
 
+    String imageUrl = _imageUrl;
+
+    // Si hay imagen nueva seleccionada, subir a Cloudinary antes de guardar
+    if (_pickedFile != null) {
+      setState(() => _uploadingImage = true);
+      try {
+        final cloudinary = getIt<CloudinaryService>();
+        final url = await cloudinary.uploadImage(_pickedFile!);
+        if (!mounted) return;
+        if (url != null) {
+          imageUrl = url;
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al subir la imagen')),
+          );
+          setState(() => _uploadingImage = false);
+          return;
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al subir imagen: $e')),
+          );
+          setState(() => _uploadingImage = false);
+        }
+        return;
+      }
+      if (mounted) setState(() => _uploadingImage = false);
+    }
+
     final id = widget.id == '0' ? Uuid().v4() : widget.id;
     final nombre = _nombreCtrl.text.trim();
     final precio = double.tryParse(_precioCtrl.text.trim()) ?? 0;
-    final imageUrl = _imageCtrl.text.trim();
 
     final producto = Producto(
       id: id,
@@ -99,7 +138,7 @@ class _ProductoPageState extends State<ProductoPage> {
       bloc.add(ActualizarProducto(producto));
     }
 
-    context.pop();
+    if (mounted) context.pop();
   }
 
   void _onDelete() {
@@ -107,11 +146,114 @@ class _ProductoPageState extends State<ProductoPage> {
     context.pop();
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? picked = await _picker.pickImage(
+      source: source,
+      imageQuality: 85,
+      maxWidth: 1200,
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _pickedFile = File(picked.path));
+  }
+
+  void _discardImage() {
+    setState(() {
+      _pickedFile = null;
+      _imageUrl = '';
+    });
+  }
+
+  Widget _buildImageSection() {
+    final hasPreview = _pickedFile != null || _imageUrl.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Imagen del producto',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: AspectRatio(
+            aspectRatio: 16 / 10,
+            child: Container(
+              color: Colors.grey[200],
+              child: hasPreview
+                  ? _pickedFile != null
+                      ? Image.file(
+                          _pickedFile!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        )
+                      : Image.network(
+                          _imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (_, __, ___) => _placeholder(),
+                        )
+                  : _placeholder(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _loading ? null : () => _pickImage(ImageSource.gallery),
+                icon: const Icon(Icons.photo_library_outlined, size: 20),
+                label: const Text('Galería'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _loading ? null : () => _pickImage(ImageSource.camera),
+                icon: const Icon(Icons.camera_alt_outlined, size: 20),
+                label: const Text('Sacar foto'),
+              ),
+            ),
+          ],
+        ),
+        if (hasPreview) ...[
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: _loading ? null : _discardImage,
+            icon: const Icon(Icons.delete_outline, size: 20),
+            label: const Text('Descartar imagen'),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _placeholder() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.add_photo_alternate_outlined, size: 56, color: Colors.grey[400]),
+          const SizedBox(height: 8),
+          Text(
+            'Selecciona una imagen',
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _nombreCtrl.dispose();
     _precioCtrl.dispose();
-    _imageCtrl.dispose();
     super.dispose();
   }
 
@@ -127,6 +269,9 @@ class _ProductoPageState extends State<ProductoPage> {
               key: _formKey,
               child: ListView(
                 children: [
+                  // Vista previa de imagen al inicio
+                  _buildImageSection(),
+                  const SizedBox(height: 20),
                   CustomField(
                     isTopField: true,
                     textEditingController: _nombreCtrl,
@@ -150,13 +295,6 @@ class _ProductoPageState extends State<ProductoPage> {
                         ? 'Precio inválido'
                         : null,
                   ),
-                  CustomField(
-                    textEditingController: _imageCtrl,
-                    label: 'URL de la imagen',
-                    hint: 'https://...',
-                    icon: Icons.link,
-                    keyboardType: TextInputType.url,
-                  ),
                   CustomDropdownField<Categoria>(
                     items: _categorias,
                     value: _categoriaId,
@@ -175,20 +313,23 @@ class _ProductoPageState extends State<ProductoPage> {
                   ),
                   const SizedBox(height: 15),
                   if (widget.id == '0')
-                    MaterialButtonWidget(onPressed: _onSubmit, texto: 'Crear')
+                    MaterialButtonWidget(
+                      onPressed: _uploadingImage ? () {} : () => _onSubmit(),
+                      texto: _uploadingImage ? 'Subiendo imagen...' : 'Crear',
+                    )
                   else
                     Row(
                       children: [
                         Expanded(
                           child: MaterialButtonWidget(
-                            onPressed: _onSubmit,
-                            texto: 'Guardar',
+                            onPressed: _uploadingImage ? () {} : () => _onSubmit(),
+                            texto: _uploadingImage ? 'Guardando...' : 'Guardar',
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: MaterialButtonWidget(
-                            onPressed: _onDelete,
+                            onPressed: _uploadingImage ? () {} : _onDelete,
                             texto: 'Eliminar',
                           ),
                         ),
