@@ -18,7 +18,14 @@ class MenuIndexState {
 }
 
 class SideMenu extends StatelessWidget {
-  static const _appLinkItems = ['/', '/productos', '/categorias'];
+  static const _appLinkItems = [
+    '/',
+    '/productos',
+    '/categorias',
+    '/tipos-gastos',
+    '/compras',
+    '/sucursales',
+  ];
 
   const SideMenu({super.key});
 
@@ -60,6 +67,18 @@ class SideMenu extends StatelessWidget {
             const NavigationDrawerDestination(
               icon: Icon(Icons.add_shopping_cart_rounded),
               label: Text('Categorias'),
+            ),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.receipt_long),
+              label: Text('Tipos de gastos'),
+            ),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.shopping_cart),
+              label: Text('Compras'),
+            ),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.store),
+              label: Text('Sucursales'),
             ),
           ],
         );

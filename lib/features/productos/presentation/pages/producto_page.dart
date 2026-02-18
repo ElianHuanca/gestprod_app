@@ -29,8 +29,10 @@ class _ProductoPageState extends State<ProductoPage> {
   List<Categoria> _categorias = [];
   String? _categoriaId;
   final ImagePicker _picker = ImagePicker();
+
   /// Imagen local seleccionada (galería o cámara), aún no subida.
   File? _pickedFile;
+
   /// URL de la imagen (después de subir a Cloudinary o al cargar producto al editar).
   String _imageUrl = '';
 
@@ -109,9 +111,9 @@ class _ProductoPageState extends State<ProductoPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al subir imagen: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error al subir imagen: $e')));
           setState(() => _uploadingImage = false);
         }
         return;
@@ -169,12 +171,24 @@ class _ProductoPageState extends State<ProductoPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Imagen del producto',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Imagen del producto',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
+                ),
               ),
+            ),
+            if (hasPreview)
+              IconButton(
+                onPressed: _loading ? null : _discardImage,
+                icon: const Icon(Icons.delete_outline),
+                tooltip: 'Descartar imagen',
+              ),
+          ],
         ),
         const SizedBox(height: 10),
         ClipRRect(
@@ -185,19 +199,19 @@ class _ProductoPageState extends State<ProductoPage> {
               color: Colors.grey[200],
               child: hasPreview
                   ? _pickedFile != null
-                      ? Image.file(
-                          _pickedFile!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        )
-                      : Image.network(
-                          _imageUrl,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          errorBuilder: (_, __, ___) => _placeholder(),
-                        )
+                        ? Image.file(
+                            _pickedFile!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          )
+                        : Image.network(
+                            _imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (_, __, ___) => _placeholder(),
+                          )
                   : _placeholder(),
             ),
           ),
@@ -207,7 +221,9 @@ class _ProductoPageState extends State<ProductoPage> {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: _loading ? null : () => _pickImage(ImageSource.gallery),
+                onPressed: _loading
+                    ? null
+                    : () => _pickImage(ImageSource.gallery),
                 icon: const Icon(Icons.photo_library_outlined, size: 20),
                 label: const Text('Galería'),
               ),
@@ -215,21 +231,15 @@ class _ProductoPageState extends State<ProductoPage> {
             const SizedBox(width: 10),
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: _loading ? null : () => _pickImage(ImageSource.camera),
+                onPressed: _loading
+                    ? null
+                    : () => _pickImage(ImageSource.camera),
                 icon: const Icon(Icons.camera_alt_outlined, size: 20),
                 label: const Text('Sacar foto'),
               ),
             ),
           ],
         ),
-        if (hasPreview) ...[
-          const SizedBox(height: 8),
-          TextButton.icon(
-            onPressed: _loading ? null : _discardImage,
-            icon: const Icon(Icons.delete_outline, size: 20),
-            label: const Text('Descartar imagen'),
-          ),
-        ],
       ],
     );
   }
@@ -239,7 +249,11 @@ class _ProductoPageState extends State<ProductoPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.add_photo_alternate_outlined, size: 56, color: Colors.grey[400]),
+          Icon(
+            Icons.add_photo_alternate_outlined,
+            size: 56,
+            color: Colors.grey[400],
+          ),
           const SizedBox(height: 8),
           Text(
             'Selecciona una imagen',
@@ -276,7 +290,7 @@ class _ProductoPageState extends State<ProductoPage> {
                     isTopField: true,
                     textEditingController: _nombreCtrl,
                     label: 'Nombre',
-                    hint: 'Ej. REDMI Buds 5 PRO',
+                    hint: 'Producto 1',
                     icon: Icons.shopping_bag_outlined,
                     textCapitalization: TextCapitalization.words,
                     validator: (v) => v == null || v.trim().isEmpty
@@ -298,8 +312,7 @@ class _ProductoPageState extends State<ProductoPage> {
                   CustomDropdownField<Categoria>(
                     items: _categorias,
                     value: _categoriaId,
-                    onChanged: (value) =>
-                        setState(() => _categoriaId = value),
+                    onChanged: (value) => setState(() => _categoriaId = value),
                     itemLabel: (c) => c.nombre,
                     itemValue: (c) => c.id,
                     label: 'Categoría',
@@ -322,7 +335,9 @@ class _ProductoPageState extends State<ProductoPage> {
                       children: [
                         Expanded(
                           child: MaterialButtonWidget(
-                            onPressed: _uploadingImage ? () {} : () => _onSubmit(),
+                            onPressed: _uploadingImage
+                                ? () {}
+                                : () => _onSubmit(),
                             texto: _uploadingImage ? 'Guardando...' : 'Guardar',
                           ),
                         ),

@@ -5,6 +5,15 @@ import 'package:gestprod_app/features/categorias/presentation/presentation.dart'
 import 'package:gestprod_app/features/productos/data/data.dart';
 import 'package:gestprod_app/features/productos/domain/domain.dart';
 import 'package:gestprod_app/features/productos/presentation/presentation.dart';
+import 'package:gestprod_app/features/compras/data/data.dart';
+import 'package:gestprod_app/features/compras/domain/domain.dart';
+import 'package:gestprod_app/features/compras/presentation/presentation.dart';
+import 'package:gestprod_app/features/sucursales/data/data.dart';
+import 'package:gestprod_app/features/sucursales/domain/domain.dart';
+import 'package:gestprod_app/features/sucursales/presentation/presentation.dart';
+import 'package:gestprod_app/features/tipos_gastos/data/data.dart';
+import 'package:gestprod_app/features/tipos_gastos/domain/domain.dart';
+import 'package:gestprod_app/features/tipos_gastos/presentation/presentation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -42,5 +51,38 @@ Future<void> serviceLocatorInit() async {
   );
   getIt.registerFactory(
     () => CategoriasBloc(getIt<CategoriasRepository>()),
+  );
+
+  // Tipos de gastos
+  getIt.registerLazySingleton<TiposGastosDataSource>(
+    () => TiposGastosDatasourceImpl(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<TiposGastosRepository>(
+    () => TiposGastosRepositoryImpl(getIt<TiposGastosDataSource>()),
+  );
+  getIt.registerFactory(
+    () => TiposGastosBloc(getIt<TiposGastosRepository>()),
+  );
+
+  // Sucursales
+  getIt.registerLazySingleton<SucursalesDataSource>(
+    () => SucursalesDatasourceImpl(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<SucursalesRepository>(
+    () => SucursalesRepositoryImpl(getIt<SucursalesDataSource>()),
+  );
+  getIt.registerFactory(
+    () => SucursalesBloc(getIt<SucursalesRepository>()),
+  );
+
+  // Compras
+  getIt.registerLazySingleton<ComprasDataSource>(
+    () => ComprasDatasourceImpl(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<ComprasRepository>(
+    () => ComprasRepositoryImpl(getIt<ComprasDataSource>()),
+  );
+  getIt.registerFactory(
+    () => ComprasBloc(getIt<ComprasRepository>()),
   );
 }
